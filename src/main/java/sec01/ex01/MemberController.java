@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/mem.do")
+// @WebServlet("/mem.do")
 public class MemberController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	MemberDAO memberDAO;
@@ -35,7 +35,7 @@ public class MemberController extends HttpServlet {
 		request.setCharacterEncoding("utf-8");
 		response.setContentType("text/html;charset=utf-8");
 		List membersList = memberDAO.listMembers(); // 요청에 대한 회원 정보를 조회한다.
-		request.setAttribute("memberList", membersList); // 조회한 회원 정보를 request에 바인딩한다.
+		request.setAttribute("membersList", membersList); // 조회한 회원 정보를 request에 바인딩한다.
 		RequestDispatcher dispatch = request.getRequestDispatcher("/test01/listMembers.jsp");
 		dispatch.forward(request, response); // 컨트롤러에서 표시하고자 하는 jsp로 포워딩함.
 	}

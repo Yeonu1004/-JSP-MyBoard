@@ -1,4 +1,4 @@
-package sec01.ex01;
+package sec02.ex01;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -28,8 +28,8 @@ public class MemberDAO {
 		}
 	}
 	
-	public List listMembers() {
-		List membersList = new ArrayList();
+	public List<MemberVO> listMembers() {
+		List<MemberVO> membersList = new ArrayList();
 		try {
 			conn = dataFactory.getConnection();
 			String query = "select * from t_member order by joinDate desc"; //SQL문 작성
@@ -55,6 +55,7 @@ public class MemberDAO {
 		}
 		return membersList;
 	}
+	
 	public void addMember(MemberVO m) {
 		try {
 			conn = dataFactory.getConnection();
@@ -63,7 +64,13 @@ public class MemberDAO {
 			String name = m.getName();
 			String email = m.getEmail();
 			String query = "INSERT INTO t_member(id, pwd, name, email)" + " VALUES(?, ? ,? ,?)";
+			System.out.println(id);
+			System.out.println(pwd);
+			System.out.println(name);
+			System.out.println(email);
+			
 			System.out.println(query);
+			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, id);
 			pstmt.setString(2, pwd);
 			pstmt.setString(3, name);
