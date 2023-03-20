@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,10 @@ public class BoardDAO {
 			e.printStackTrace();
 		}
 	}
+	
+	public Connection getConnection() throws SQLException {
+        return dataFactory.getConnection();
+    }
 
 	public List selectAllArticles(Map pagingMap){
 		List articlesList = new ArrayList();
@@ -207,35 +212,40 @@ public class BoardDAO {
 	}
 
 	public void updateArticle(ArticleVO article) {
-		int articleNO = article.getArticleNO();
-		String title = article.getTitle();
-		String content = article.getContent();
-		String imageFileName = article.getImageFileName();
-		try {
-			conn = dataFactory.getConnection();
-			String query = "update t_board  set title=?,content=?";
-			if (imageFileName != null && imageFileName.length() != 0) {
-				query += ",imageFileName=?";
-			}
-			query += " where articleNO=?";
+	    int articleNO = article.getArticleNO();
+	    String title = article.getTitle();
+	    String content = article.getContent();
+	    String imageFileName = article.getImageFileName();
 
-			System.out.println(query);
-			pstmt = conn.prepareStatement(query);
-			pstmt.setString(1, title);
-			pstmt.setString(2, content);
-			if (imageFileName != null && imageFileName.length() != 0) {
-				pstmt.setString(3, imageFileName);
-				pstmt.setInt(4, articleNO);
-			} else {
-				pstmt.setInt(3, articleNO);
-			}
-			pstmt.executeUpdate();
-			pstmt.close();
-			conn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    try {
+	        conn = dataFactory.getConnection();
+	        String query = "update t_board set title=?, content=? ";
+	        if (imageFileName != null && imageFileName.length() != 0) {
+	            query += ", imageFileName=? ";
+	        }
+	        query += " where articleNO=?";
+
+	        System.out.println(query);
+	        pstmt = conn.prepareStatement(query);
+	        pstmt.setString(1, title);
+	        pstmt.setString(2, content);
+
+	        int paramIndex = 3; // 이미지 파일명이 없는 경우는 articleNO가 3번째 파라미터임
+	        if (imageFileName != null && imageFileName.length() != 0) {
+	            pstmt.setString(paramIndex++, imageFileName);
+	        }
+
+	        pstmt.setInt(paramIndex, articleNO);
+	        pstmt.executeUpdate();
+
+	        pstmt.close();
+	        conn.close();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
+
 
 	public void deleteArticle(int articleNO) {
 		try {
