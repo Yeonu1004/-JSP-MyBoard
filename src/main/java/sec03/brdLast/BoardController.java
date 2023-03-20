@@ -192,7 +192,14 @@ public class BoardController extends HttpServlet {
 						+ "/board/viewArticle.do?articleNO=" + articleNO + "';</script>");
 				return;
 
-			} else if (action.equals("/removeArticle.do")) {
+			} else if(action.equals("/updateForm.do")) {
+			    int articleNO = Integer.parseInt(request.getParameter("articleNO"));
+			    ArticleVO vo = boardService.getArticle(articleNO);
+			    request.setAttribute("vo", vo);
+			    String path = "/board07/updateForm.jsp";
+			    RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+			    dispatcher.forward(request, response);
+			}else if (action.equals("/removeArticle.do")) {
 				int articleNO = Integer.parseInt(request.getParameter("articleNO"));
 				HttpSession httpSession = request.getSession();
 				String id = (String) httpSession.getAttribute("id");
