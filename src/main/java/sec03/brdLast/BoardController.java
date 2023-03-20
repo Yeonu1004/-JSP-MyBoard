@@ -143,12 +143,15 @@ public class BoardController extends HttpServlet {
 						+ "/board/listArticles.do';" + "</script>");
 
 				return;
-			} else if (action.equals("/viewArticle.do")) {
+			} // View an article
+			else if (action.equals("/viewArticle.do")) {
 				String articleNO = request.getParameter("articleNO");
 				articleVO = boardService.viewArticle(Integer.parseInt(articleNO));
 				request.setAttribute("article", articleVO);
-				nextPage = "/board07/viewArticle.jsp";
-			} else if (action.equals("/modArticle.do")) {
+				RequestDispatcher dispatcher = request.getRequestDispatcher("/board07/viewArticle.jsp");
+				dispatcher.forward(request, response);
+			} // Modify an article
+			else if (action.equals("/modArticle.do")) {
 				Map<String, String> articleMap = upload(request, response);
 				int articleNO = Integer.parseInt(articleMap.get("articleNO"));
 				articleVO.setArticleNO(articleNO);
@@ -162,9 +165,9 @@ public class BoardController extends HttpServlet {
 				// Check if the user editing the post is the author
 				ArticleVO originalArticle = boardService.viewArticle(articleNO);
 				if (!originalArticle.getId().equals(id)) {
-				    PrintWriter pw = response.getWriter();
-				    pw.print("<script>alert('You are not authorized to edit this post.')</script>");
-				    return;
+					PrintWriter pw = response.getWriter();
+					pw.print("<script>alert('게시글을 수정하였습니다.')</script>");
+					return;
 				}
 
 				articleVO.setId(id);
@@ -173,28 +176,21 @@ public class BoardController extends HttpServlet {
 				articleVO.setImageFileName(imageFileName);
 				boardService.modArticle(articleVO);
 
-				if (imageFileName != null && imageFileName.length() != 0 ) {
-				    String originalFileName = articleMap.get("originalFileName");
-				    File srcFile = new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + imageFileName);
-				    File destDir = new File(ARTICLE_IMAGE_REPO + "\\" + articleNO);
-				    destDir.mkdirs();
-				    FileUtils.moveFileToDirectory(srcFile, destDir, true);
+				if (imageFileName != null && imageFileName.length() != 0) {
+					String originalFileName = articleMap.get("originalFileName");
+					File srcFile = new File(ARTICLE_IMAGE_REPO + "\\" + "temp" + "\\" + imageFileName);
+					File destDir = new File(ARTICLE_IMAGE_REPO + "\\" + articleNO);
+					destDir.mkdirs();
+					FileUtils.moveFileToDirectory(srcFile, destDir, true);
 
-				    File oldFile = new File(ARTICLE_IMAGE_REPO + "\\" + articleNO + "\\" + originalFileName);
-				    oldFile.delete();
+					File oldFile = new File(ARTICLE_IMAGE_REPO + "\\" + articleNO + "\\" + originalFileName);
+					oldFile.delete();
 				}
 
-				// Prompt user with a message asking if they really want to edit the post
 				PrintWriter pw = response.getWriter();
-				pw.print("<script>");
-				pw.print("var confirmEdit = confirm('Do you really want to edit this post?');");
-				pw.print("if (confirmEdit) {");
-				pw.print("alert('Your post has been edited.');");
-				pw.print("location.href='" + request.getContextPath() + "/board/viewArticle.do?articleNO=" + articleNO + "';");
-				pw.print("}");
-				pw.print("</script>");
+				pw.print("<script>alert('Your post has been edited.');location.href='" + request.getContextPath()
+						+ "/board/viewArticle.do?articleNO=" + articleNO + "';</script>");
 				return;
-
 
 			} else if (action.equals("/removeArticle.do")) {
 				int articleNO = Integer.parseInt(request.getParameter("articleNO"));
@@ -216,13 +212,14 @@ public class BoardController extends HttpServlet {
 						File oldFile = new File(ARTICLE_IMAGE_REPO + "\\" + articleNO + "\\" + originalFileName);
 						oldFile.delete();
 					}
-					// 삭제할건지 물어봅니다
-					PrintWriter pw = response.getWriter();
-					pw.print("<script>" + "if (confirm('게시글을 삭제하시겠습니까?')) {" + "    alert('게시글을 삭제하였습니다');"
-							+ "    location.href='" + request.getContextPath() + "/board/removeArticle.do?articleNO="
-							+ articleNO + "';" + "} else {" + "    alert('게시글 삭제를 취소하였습니다');" + "    location.href='"
-							+ request.getContextPath() + "/board/listArticles.do';" + "}" + "</script>");
 
+					// 게시글이 삭제되었다는 알림창을 띄우고 목록 페이지로 이동
+					response.setContentType("text/html;charset=utf-8");
+					PrintWriter pw = response.getWriter();
+					pw.println("<script>");
+					pw.println("alert('게시글이 삭제되었습니다.');");
+					pw.println("location.href='" + request.getContextPath() + "/board/listArticles.do';");
+					pw.println("</script>");
 					return;
 				} else {
 					PrintWriter pw = response.getWriter();
@@ -231,6 +228,7 @@ public class BoardController extends HttpServlet {
 							+ "</script>");
 					return;
 				}
+				
 			} else if (action.equals("/replyForm.do")) {
 				int parentNO = Integer.parseInt(request.getParameter("parentNO"));
 				session = request.getSession();
@@ -251,7 +249,9 @@ public class BoardController extends HttpServlet {
 					String imageFileName = articleMap.get("imageFileName");
 					ArticleVO articleVO = new ArticleVO(); // articleVO 변수 초기화
 					articleVO.setParentNO(parentNO);
-					articleVO.setId("lee");
+					HttpSession httpSession = request.getSession();
+					String id = (String) httpSession.getAttribute("id");
+					articleVO.setId(id);
 					articleVO.setTitle(title);
 					articleVO.setContent(content);
 					articleVO.setImageFileName(imageFileName);

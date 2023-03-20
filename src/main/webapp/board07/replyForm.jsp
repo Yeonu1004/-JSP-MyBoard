@@ -35,7 +35,7 @@
     <table align="center">
     <tr>
 			<td align="right"> 글쓴이:&nbsp; </td>
-			<td><input type="text" size="5" value="lee" disabled /> </td>
+			<td><input type="text" name="re_name" value="${sessionScope.id}" size="15" maxlength="10" style="background-color:rgba(0,0,0,0.1); " readonly></td>
 		</tr>
 		<tr>
 			<td align="right">글제목:&nbsp;  </td>
